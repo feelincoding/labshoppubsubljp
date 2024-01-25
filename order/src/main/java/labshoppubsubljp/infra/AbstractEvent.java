@@ -2,7 +2,7 @@ package labshoppubsubljp.infra;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import labshoppubsubljp.DeliveryApplication;
+import labshoppubsubljp.OrderApplication;
 import labshoppubsubljp.config.kafka.KafkaProcessor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -33,7 +33,7 @@ public class AbstractEvent {
         /**
          * spring streams 방식
          */
-        KafkaProcessor processor = DeliveryApplication.applicationContext.getBean(
+        KafkaProcessor processor = OrderApplication.applicationContext.getBean(
             KafkaProcessor.class
         );
         MessageChannel outputChannel = processor.outboundTopic();

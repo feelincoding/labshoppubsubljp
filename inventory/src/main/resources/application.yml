@@ -1,6 +1,5 @@
 server:
   port: 8080
-
 spring:
   application:
     name: inventory
@@ -13,12 +12,31 @@ spring:
       hibernate:
         show_sql: true
         format_sql: true
-        implicit_naming_strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl
+  kafka:
+    producer:
+      retries: 5
+      acks: all
+      properties:
+        enable:
+          idempotence: true   # Set Producer exactly once Trx
+    consumer:
+      properties:
+        spring.json.trusted.packages: "*"
+        isolation.level: read_committed         
   cloud:
     stream:
       kafka:
         binder:
           brokers: localhost:9092
+          transaction:
+            transactionIdPrefix: tx-${random.uuid}   
+        bindings:
+          event-in:
+            consumer:
+              autoCommitOffset: false    # Disable Offset auto commit
+              enableDlq: true
+              dlqName: dlq-labshoppubsubljp
+              dlqPartitions: 1         
         streams:
           binder:
             configuration:
@@ -30,14 +48,14 @@ spring:
       bindings:
         event-in:
           group: inventory
-#<<< EDA / Topic Name
+//<<< EDA / Topic Name
           destination: labshoppubsubljp
-#>>> EDA / Topic Name
+//>>> EDA / Topic Name
           contentType: application/json
         event-out:
-#<<< EDA / Topic Name
+//<<< EDA / Topic Name
           destination: labshoppubsubljp
-#>>> EDA / Topic Name
+//>>> EDA / Topic Name
           contentType: application/json
 
 logging:
@@ -47,23 +65,37 @@ logging:
 
 
 server:
-  port: 8083
+  port: 8082
 
 ---
 
 spring:
   profiles: docker
-  jpa:
-    properties:
-      hibernate:
-        show_sql: true
-        format_sql: true
-        implicit_naming_strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl
+  kafka:
+    producer:
+      retries: 5
+      acks: all
+      properties:
+        enable:
+          idempotence: true   # Set Producer exactly once Trx
+    consumer:
+      properties:
+        spring.json.trusted.packages: "*"
+        isolation.level: read_committed    
   cloud:
     stream:
       kafka:
         binder:
           brokers: my-kafka:9092
+          transaction:
+            transactionIdPrefix: tx-${random.uuid}   
+        bindings:
+          event-in:
+            consumer:
+              autoCommitOffset: false    # Disable Offset auto commit
+              enableDlq: true
+              dlqName: dlq-labshoppubsubljp
+              dlqPartitions: 1              
         streams:
           binder:
             configuration:
